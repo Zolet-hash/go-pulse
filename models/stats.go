@@ -15,4 +15,5 @@ type Stats struct {
 	ResponseTimeMs int64         `json:"response_time_ms"`
 	Status         WebsiteStatus `json:"status"`
 	Error          string        `json:"error,omitempty"`
+	DNSError       string        `json:"dns_error,omitempty"`
 }
