@@ -3,33 +3,25 @@ package dns
 import (
 	"context"
 	"net"
-	"time"
 )
 
-// Resolve hostname into IPv4 and Ipv6 addresses.
-func ResolveIPAddresses(hostname string) (string, string, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+// ResolveIPAddresses resolves the first available IPv4 & IPv6 addresses
+func ResolveIPAddresses(ctx context.Context, hostname string) (string, string, error) {
 
-	resolver := net.DefaultResolver
-
-	addresses, err := resolver.LookupIPAddr(ctx, hostname)
+	addresses, err := net.DefaultResolver.LookupIPAddr(ctx, hostname)
 	if err != nil {
 		return "", "", err
 	}
 
-	var ipv4 string
-	var ipv6 string
+	var ipv4, ipv6 string
 
 	for _, address := range addresses {
-		if address.IP.To4() != nil {
-			if ipv4 == "" {
-				ipv4 = address.IP.String()
-			}
-		} else if address.IP.To16() != nil {
-			if ipv6 == "" {
-				ipv6 = address.IP.String()
-			}
+		switch {
+		case address.IP.To4() != nil && ipv4 == "":
+			ipv4 = address.IP.String()
+
+		case address.IP.To16() != nil && ipv6 == "":
+			ipv6 = address.IP.String()
 		}
 	}
 	return ipv4, ipv6, nil
